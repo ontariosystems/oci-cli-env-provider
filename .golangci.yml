@@ -1,0 +1,11 @@
+version: "2"
+output:
+  formats:
+    text:
+      path: stdout
+linters:
+  exclusions:
+    rules:
+      - linters:
+          - staticcheck
+        text: EncryptPEMBlock
