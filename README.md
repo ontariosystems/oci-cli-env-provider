@@ -11,4 +11,5 @@ that uses the [standard environment variables from the OCI CLI](https://docs.ora
 
 ## Copyright
 Copyright 2025 Finvi, Ontario Systems
+
 Licensed under the Apache License, Version 2.0

@@ -35,20 +35,20 @@ func TestBooks(t *testing.T) {
 	RunSpecs(t, "OCI CLI Env Provider Suite")
 }
 
+var _ = BeforeEach(func() {
+	for _, env := range os.Environ() {
+		key := strings.SplitN(env, "=", 2)[0]
+		if strings.HasPrefix(key, "OCI_") {
+			_ = os.Unsetenv(key)
+		}
+	}
+})
+
 var _ = Describe("OciCliEnvironmentConfigurationProvider", func() {
 	var (
 		privateKeyPath string
 		conf           = OciCliEnvironmentConfigurationProvider()
 	)
-
-	BeforeEach(func() {
-		for _, env := range os.Environ() {
-			key := strings.SplitN(env, "=", 2)[0]
-			if strings.HasPrefix(key, "OCI_") {
-				_ = os.Unsetenv(key)
-			}
-		}
-	})
 
 	AfterEach(func() {
 		_ = os.Remove(privateKeyPath)
@@ -56,17 +56,17 @@ var _ = Describe("OciCliEnvironmentConfigurationProvider", func() {
 
 	Context("valid configuration", func() {
 		BeforeEach(func() {
-			_ = os.Setenv("OCI_CLI_USER", testUser)
-			_ = os.Setenv("OCI_CLI_TENANCY", testTenancy)
-			_ = os.Setenv("OCI_CLI_FINGERPRINT", testFingerprint)
-			_ = os.Setenv("OCI_CLI_REGION", testRegion)
+			_ = os.Setenv(EnvUser, testUser)
+			_ = os.Setenv(EnvTenancy, testTenancy)
+			_ = os.Setenv(EnvFingerprint, testFingerprint)
+			_ = os.Setenv(EnvRegion, testRegion)
 		})
 
 		When("environment variables are set for api key", func() {
 			BeforeEach(func() {
 				privateKeyPath = createTempFile(testPrivateKeyConf)
-				_ = os.Setenv("OCI_CLI_KEY_FILE", privateKeyPath)
-				_ = os.Setenv("OCI_CLI_AUTH", string(ApiKeyType))
+				_ = os.Setenv(EnvKeyFile, privateKeyPath)
+				_ = os.Setenv(EnvAuth, string(ApiKeyType))
 			})
 
 			It("has valid configuration", func() {
@@ -81,8 +81,8 @@ var _ = Describe("OciCliEnvironmentConfigurationProvider", func() {
 
 			Context("with key content environment variable", func() {
 				BeforeEach(func() {
-					_ = os.Unsetenv("OCI_CLI_KEY_FILE")
-					_ = os.Setenv("OCI_CLI_KEY_CONTENT", string(testPrivateKeyConf))
+					_ = os.Unsetenv(EnvKeyFile)
+					_ = os.Setenv(EnvKeyContent, string(testPrivateKeyConf))
 				})
 
 				It("has valid configuration", func() {
@@ -95,8 +95,8 @@ var _ = Describe("OciCliEnvironmentConfigurationProvider", func() {
 			Context("with encrypted key file", func() {
 				BeforeEach(func() {
 					privateKeyPath = createTempFile(testEncryptedPrivateKeyConf)
-					_ = os.Setenv("OCI_CLI_KEY_FILE", privateKeyPath)
-					_ = os.Setenv("OCI_CLI_PASSPHRASE", testPassphrase)
+					_ = os.Setenv(EnvKeyFile, privateKeyPath)
+					_ = os.Setenv(EnvPassphrase, testPassphrase)
 				})
 				It("has valid configuration", func() {
 					valid, err := common.IsConfigurationProviderValid(conf)
@@ -107,9 +107,9 @@ var _ = Describe("OciCliEnvironmentConfigurationProvider", func() {
 
 			Context("with encrypted key content", func() {
 				BeforeEach(func() {
-					_ = os.Unsetenv("OCI_CLI_KEY_FILE")
-					_ = os.Setenv("OCI_CLI_KEY_CONTENT", string(testEncryptedPrivateKeyConf))
-					_ = os.Setenv("OCI_CLI_PASSPHRASE", testPassphrase)
+					_ = os.Unsetenv(EnvKeyFile)
+					_ = os.Setenv(EnvKeyContent, string(testEncryptedPrivateKeyConf))
+					_ = os.Setenv(EnvPassphrase, testPassphrase)
 				})
 				It("has valid configuration", func() {
 					valid, err := common.IsConfigurationProviderValid(conf)
@@ -123,11 +123,11 @@ var _ = Describe("OciCliEnvironmentConfigurationProvider", func() {
 			var tokenFilePath string
 			BeforeEach(func() {
 				privateKeyPath = createTempFile(testPrivateKeyConf)
-				_ = os.Setenv("OCI_CLI_KEY_FILE", privateKeyPath)
-				_ = os.Setenv("OCI_CLI_AUTH", string(SecurityTokenType))
-				_ = os.Unsetenv("OCI_CLI_USER")
+				_ = os.Setenv(EnvKeyFile, privateKeyPath)
+				_ = os.Setenv(EnvAuth, string(SecurityTokenType))
+				_ = os.Unsetenv(EnvUser)
 				tokenFilePath = createTempFile([]byte(testSecurityToken))
-				_ = os.Setenv("OCI_CLI_SECURITY_TOKEN_FILE", tokenFilePath)
+				_ = os.Setenv(EnvSecurityTokenFile, tokenFilePath)
 			})
 			AfterEach(func() {
 				_ = os.Remove(tokenFilePath)
@@ -145,10 +145,10 @@ var _ = Describe("OciCliEnvironmentConfigurationProvider", func() {
 	Context("invalid configuration", func() {
 		Context("invalid private key", func() {
 			BeforeEach(func() {
-				_ = os.Setenv("OCI_CLI_USER", testUser)
-				_ = os.Setenv("OCI_CLI_TENANCY", testTenancy)
-				_ = os.Setenv("OCI_CLI_FINGERPRINT", testFingerprint)
-				_ = os.Setenv("OCI_CLI_REGION", testRegion)
+				_ = os.Setenv(EnvUser, testUser)
+				_ = os.Setenv(EnvTenancy, testTenancy)
+				_ = os.Setenv(EnvFingerprint, testFingerprint)
+				_ = os.Setenv(EnvRegion, testRegion)
 			})
 
 			When("neither key content nor file set", func() {
@@ -161,7 +161,7 @@ var _ = Describe("OciCliEnvironmentConfigurationProvider", func() {
 
 			When("key path is invalid", func() {
 				BeforeEach(func() {
-					_ = os.Setenv("OCI_CLI_KEY_FILE", "/does/not/exist")
+					_ = os.Setenv(EnvKeyFile, "/does/not/exist")
 				})
 				It("does not have valid configuration", func() {
 					valid, err := common.IsConfigurationProviderValid(conf)
@@ -173,9 +173,9 @@ var _ = Describe("OciCliEnvironmentConfigurationProvider", func() {
 
 		Context("invalid tenancy", func() {
 			BeforeEach(func() {
-				_ = os.Setenv("OCI_CLI_USER", testUser)
-				_ = os.Setenv("OCI_CLI_FINGERPRINT", testFingerprint)
-				_ = os.Setenv("OCI_CLI_REGION", testRegion)
+				_ = os.Setenv(EnvUser, testUser)
+				_ = os.Setenv(EnvFingerprint, testFingerprint)
+				_ = os.Setenv(EnvRegion, testRegion)
 			})
 			It("does not have valid configuration", func() {
 				valid, err := common.IsConfigurationProviderValid(conf)
@@ -191,9 +191,9 @@ var _ = Describe("OciCliEnvironmentConfigurationProvider", func() {
 
 		Context("invalid fingerprint", func() {
 			BeforeEach(func() {
-				_ = os.Setenv("OCI_CLI_USER", testUser)
-				_ = os.Setenv("OCI_CLI_TENANCY", testTenancy)
-				_ = os.Setenv("OCI_CLI_REGION", testRegion)
+				_ = os.Setenv(EnvUser, testUser)
+				_ = os.Setenv(EnvTenancy, testTenancy)
+				_ = os.Setenv(EnvRegion, testRegion)
 			})
 			It("does not have valid configuration", func() {
 				valid, err := common.IsConfigurationProviderValid(conf)
@@ -209,9 +209,9 @@ var _ = Describe("OciCliEnvironmentConfigurationProvider", func() {
 
 		Context("invalid region", func() {
 			BeforeEach(func() {
-				_ = os.Setenv("OCI_CLI_USER", testUser)
-				_ = os.Setenv("OCI_CLI_TENANCY", testTenancy)
-				_ = os.Setenv("OCI_CLI_FINGERPRINT", testFingerprint)
+				_ = os.Setenv(EnvUser, testUser)
+				_ = os.Setenv(EnvTenancy, testTenancy)
+				_ = os.Setenv(EnvFingerprint, testFingerprint)
 			})
 			It("does not have valid configuration", func() {
 				valid, err := common.IsConfigurationProviderValid(conf)
@@ -222,9 +222,9 @@ var _ = Describe("OciCliEnvironmentConfigurationProvider", func() {
 
 			When("auth type is not sso", func() {
 				BeforeEach(func() {
-					_ = os.Setenv("OCI_CLI_AUTH", string(common.InstancePrincipal))
-					_ = os.Unsetenv("OCI_CLI_REGION")
-					_ = os.Unsetenv("OCI_CLI_USER")
+					_ = os.Setenv(EnvAuth, string(common.InstancePrincipal))
+					_ = os.Unsetenv(EnvRegion)
+					_ = os.Unsetenv(EnvUser)
 				})
 
 				It("does not have valid configuration", func() {
@@ -237,9 +237,9 @@ var _ = Describe("OciCliEnvironmentConfigurationProvider", func() {
 
 		Context("no user and invalid auth type", func() {
 			BeforeEach(func() {
-				_ = os.Setenv("OCI_CLI_TENANCY", testTenancy)
-				_ = os.Setenv("OCI_CLI_FINGERPRINT", testFingerprint)
-				_ = os.Setenv("OCI_CLI_REGION", testRegion)
+				_ = os.Setenv(EnvTenancy, testTenancy)
+				_ = os.Setenv(EnvFingerprint, testFingerprint)
+				_ = os.Setenv(EnvRegion, testRegion)
 			})
 			It("does not have valid configuration", func() {
 				_, err := conf.KeyID()
@@ -250,10 +250,10 @@ var _ = Describe("OciCliEnvironmentConfigurationProvider", func() {
 
 		Context("invalid security token", func() {
 			BeforeEach(func() {
-				_ = os.Setenv("OCI_CLI_TENANCY", testTenancy)
-				_ = os.Setenv("OCI_CLI_FINGERPRINT", testFingerprint)
-				_ = os.Setenv("OCI_CLI_REGION", testRegion)
-				_ = os.Setenv("OCI_CLI_AUTH", string(SecurityTokenType))
+				_ = os.Setenv(EnvTenancy, testTenancy)
+				_ = os.Setenv(EnvFingerprint, testFingerprint)
+				_ = os.Setenv(EnvRegion, testRegion)
+				_ = os.Setenv(EnvAuth, string(SecurityTokenType))
 			})
 
 			When("the token path is not set", func() {
@@ -270,7 +270,7 @@ var _ = Describe("OciCliEnvironmentConfigurationProvider", func() {
 
 			When("the token path is invalid", func() {
 				BeforeEach(func() {
-					_ = os.Setenv("OCI_CLI_SECURITY_TOKEN_FILE", "/does/not/exist")
+					_ = os.Setenv(EnvSecurityTokenFile, "/does/not/exist")
 				})
 				It("does not have valid configuration", func() {
 					valid, err := common.IsConfigurationProviderValid(conf)

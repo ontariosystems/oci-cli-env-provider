@@ -18,7 +18,6 @@ package internal
 
 import (
 	"os"
-	"os/user"
 	"path"
 	"strings"
 )
@@ -27,20 +26,11 @@ import (
 // relative paths are expanded and ~/ replaced with the home directory
 func ExpandPath(filePath string) string {
 	filePath = path.Clean(filePath)
-	if strings.HasPrefix(filePath, "~") {
-		rest := filePath[2:]
-		filePath = path.Join(getHomeFolder(), rest)
+	if !strings.HasPrefix(filePath, "~/") {
+		return filePath
 	}
-	return filePath
-}
 
-func getHomeFolder() string {
-	current, err := user.Current()
-	if err != nil {
-		if home := os.Getenv("HOME"); home != "" {
-			return home
-		}
-		return os.Getenv("USERPROFILE")
-	}
-	return current.HomeDir
+	rest := filePath[2:]
+	home, _ := os.UserHomeDir()
+	return path.Join(home, rest)
 }

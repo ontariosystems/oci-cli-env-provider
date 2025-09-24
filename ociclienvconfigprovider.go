@@ -47,14 +47,18 @@ func OciCliEnvironmentConfigurationProvider() common.ConfigurationProvider {
 
 type ociCliEnvProvider struct{}
 
-func (p *ociCliEnvProvider) PrivateRSAKey() (*rsa.PrivateKey, error) {
-	passphrase := os.Getenv("OCI_CLI_PASSPHRASE")
+func (p *ociCliEnvProvider) Passphrase() string {
+	return os.Getenv(EnvPassphrase)
+}
 
-	if value, ok := os.LookupEnv("OCI_CLI_KEY_CONTENT"); ok {
+func (p *ociCliEnvProvider) PrivateRSAKey() (*rsa.PrivateKey, error) {
+	passphrase := p.Passphrase()
+
+	if value, ok := os.LookupEnv(EnvKeyContent); ok {
 		return common.PrivateKeyFromBytesWithPassword([]byte(value), []byte(passphrase))
 	}
 
-	if value, ok := os.LookupEnv("OCI_CLI_KEY_FILE"); ok {
+	if value, ok := os.LookupEnv(EnvKeyFile); ok {
 		content, err := os.ReadFile(internal.ExpandPath(value))
 		if err != nil {
 			return nil, err
@@ -63,7 +67,7 @@ func (p *ociCliEnvProvider) PrivateRSAKey() (*rsa.PrivateKey, error) {
 		return common.PrivateKeyFromBytesWithPassword(content, []byte(passphrase))
 	}
 
-	return nil, errors.Join(&EnvError{"OCI_CLI_KEY_CONTENT"}, &EnvError{"OCI_CLI_KEY_FILE"})
+	return nil, errors.Join(&EnvError{EnvKeyContent}, &EnvError{EnvKeyFile})
 }
 
 func (p *ociCliEnvProvider) KeyID() (keyID string, err error) {
@@ -88,9 +92,9 @@ func (p *ociCliEnvProvider) KeyID() (keyID string, err error) {
 	}
 	switch at.AuthType {
 	case SecurityTokenType:
-		tokenPath, ok := os.LookupEnv("OCI_CLI_SECURITY_TOKEN_FILE")
+		tokenPath, ok := os.LookupEnv(EnvSecurityTokenFile)
 		if !ok {
-			return "", &EnvError{"OCI_CLI_SECURITY_TOKEN_FILE"}
+			return "", &EnvError{EnvSecurityTokenFile}
 		}
 
 		var token []byte
@@ -106,41 +110,41 @@ func (p *ociCliEnvProvider) KeyID() (keyID string, err error) {
 }
 
 func (p *ociCliEnvProvider) TenancyOCID() (string, error) {
-	value, ok := os.LookupEnv("OCI_CLI_TENANCY")
+	value, ok := os.LookupEnv(EnvTenancy)
 	if !ok {
-		return "", &EnvError{"OCI_CLI_TENANCY"}
+		return "", &EnvError{EnvTenancy}
 	}
 	return value, nil
 }
 
 func (p *ociCliEnvProvider) UserOCID() (string, error) {
-	value, ok := os.LookupEnv("OCI_CLI_USER")
+	value, ok := os.LookupEnv(EnvUser)
 	if !ok {
-		return "", &EnvError{"OCI_CLI_USER"}
+		return "", &EnvError{EnvUser}
 	}
 	return value, nil
 }
 
 func (p *ociCliEnvProvider) KeyFingerprint() (string, error) {
-	value, ok := os.LookupEnv("OCI_CLI_FINGERPRINT")
+	value, ok := os.LookupEnv(EnvFingerprint)
 	if !ok {
-		return "", &EnvError{"OCI_CLI_FINGERPRINT"}
+		return "", &EnvError{EnvFingerprint}
 	}
 	return value, nil
 }
 
 func (p *ociCliEnvProvider) Region() (string, error) {
-	value, ok := os.LookupEnv("OCI_CLI_REGION")
+	value, ok := os.LookupEnv(EnvRegion)
 	if !ok {
-		return "", &EnvError{"OCI_CLI_REGION"}
+		return "", &EnvError{EnvRegion}
 	}
 	return value, nil
 }
 
 func (p *ociCliEnvProvider) AuthType() (common.AuthConfig, error) {
-	value, ok := os.LookupEnv("OCI_CLI_AUTH")
+	value, ok := os.LookupEnv(EnvAuth)
 	if !ok {
-		return common.AuthConfig{AuthType: common.UnknownAuthenticationType}, &EnvError{"OCI_CLI_AUTH"}
+		return common.AuthConfig{AuthType: common.UnknownAuthenticationType}, &EnvError{EnvAuth}
 	}
 
 	switch at := common.AuthenticationType(value); at {
