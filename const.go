@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package oci_cli_env_provider
+package ocep
 
 /*
 The standard [oci-cli environment variables] we use

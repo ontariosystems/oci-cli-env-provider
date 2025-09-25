@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package oci_cli_env_provider
+package ocep
 
 import (
 	"os"
@@ -26,6 +26,9 @@ import (
 
 // DefaultConfigProvider returns a [common.ConfigurationProvider] containing providers for oci cli
 // environment variables, as well as those returned by [common.DefaultConfigProvider]
+//
+// Be aware that if you want AuthType to be set, it must be set with the [EnvAuth] environment
+// variable. [common.ComposingConfigurationProvider] only calls AuthType on the first provider.
 func DefaultConfigProvider() common.ConfigurationProvider {
 	var providers []common.ConfigurationProvider
 

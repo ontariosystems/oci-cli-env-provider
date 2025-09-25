@@ -15,12 +15,12 @@ limitations under the License.
 */
 
 /*
-Package oci_cli_env_provider creates a [common.ConfigurationProvider] which reads the
+Package ocep creates a [common.ConfigurationProvider] which reads the
 configuration specified by [oci-cli environment variables].
 
 [oci-cli environment variables]: https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/clienvironmentvariables.htm
 */
-package oci_cli_env_provider
+package ocep
 
 import (
 	"crypto/rsa"

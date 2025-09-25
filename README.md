@@ -8,6 +8,7 @@
 Implements a `common.ConfigurationProvider` from [oracle/oci-go-sdk](https://github.com/oracle/oci-go-sdk) 
 that uses the [standard environment variables from the OCI CLI](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/clienvironmentvariables.htm).
 
+See [GoDocs](https://godoc.org/github.com/ontariosystems/oci-cli-env-provider) for example code.
 
 ## Copyright
 Copyright 2025 Finvi, Ontario Systems

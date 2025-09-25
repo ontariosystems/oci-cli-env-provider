@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package oci_cli_env_provider
+package ocep_test
 
 import (
 	"bytes"
@@ -24,6 +24,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/ontariosystems/oci-cli-env-provider"
 	"github.com/oracle/oci-go-sdk/v65/common"
 )
 
