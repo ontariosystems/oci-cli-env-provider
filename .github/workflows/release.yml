@@ -13,13 +13,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: master
+          ref: main
       - run: git fetch --tags
       - name: check branch
         run: |
-          br="$(git branch --contains $GITHUB_REF --format '%(refname:short)' master)"
-          if [[ "$br" != "master" ]]; then
-            echo "$br != master"
+          br="$(git branch --contains $GITHUB_REF --format '%(refname:short)' main)"
+          if [[ "$br" != "main" ]]; then
+            echo "$br != main"
             exit 1
           fi
       - name: Test
