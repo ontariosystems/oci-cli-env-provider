@@ -26,9 +26,6 @@ import (
 
 // DefaultConfigProvider returns a [common.ConfigurationProvider] containing providers for oci cli
 // environment variables, as well as those returned by [common.DefaultConfigProvider]
-//
-// Be aware that if you want AuthType to be set, it must be set with the [EnvAuth] environment
-// variable. [common.ComposingConfigurationProvider] only calls AuthType on the first provider.
 func DefaultConfigProvider() common.ConfigurationProvider {
 	var providers []common.ConfigurationProvider
 
@@ -53,6 +50,5 @@ func DefaultConfigProvider() common.ConfigurationProvider {
 	}
 
 	providers = append(providers, common.DefaultConfigProvider())
-	provider, _ := common.ComposingConfigurationProvider(providers)
-	return provider
+	return ComposingConfigProvider(providers...)
 }

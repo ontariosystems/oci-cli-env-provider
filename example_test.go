@@ -22,6 +22,7 @@ import (
 
 	"github.com/ontariosystems/oci-cli-env-provider"
 	"github.com/oracle/oci-go-sdk/v65/common"
+	"github.com/oracle/oci-go-sdk/v65/common/auth"
 	"github.com/oracle/oci-go-sdk/v65/identity"
 )
 
@@ -49,6 +50,28 @@ func Example() {
 // The output will be your Tenancy OCID.
 func ExampleOciCliEnvironmentConfigurationProvider() {
 	provider := ocep.OciCliEnvironmentConfigurationProvider()
+	client, _ := identity.NewIdentityClientWithConfigurationProvider(provider)
+
+	tenancyID, _ := provider.TenancyOCID()
+	req := identity.GetCompartmentRequest{
+		CompartmentId:   common.String(tenancyID),
+		RequestMetadata: metadata,
+	}
+	resp, _ := client.GetCompartment(context.TODO(), req)
+	fmt.Printf("CompartmentId: %s\n", *resp.Id)
+}
+
+// The [LazyConfigProvider] can be used to wrap providers that can only be created under
+// certain circumstances (such as on a compute instance).
+//
+// Normally [auth.InstancePrincipalConfigurationProvider] will fail if not on a compute instance,
+// but here it won't be called unless the other providers in the [ComposingConfigProvider] do not
+// provide valid configuration
+func ExampleLazyConfigProvider() {
+	provider := ocep.ComposingConfigProvider(
+		ocep.DefaultConfigProvider(),
+		ocep.LazyConfigProvider(auth.InstancePrincipalConfigurationProvider),
+	)
 	client, _ := identity.NewIdentityClientWithConfigurationProvider(provider)
 
 	tenancyID, _ := provider.TenancyOCID()

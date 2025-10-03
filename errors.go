@@ -22,7 +22,8 @@ import (
 )
 
 var (
-	ErrNoKeyId = errors.New("could not determine KeyID")
+	ErrNoKeyId    = errors.New("could not determine KeyID")
+	ErrNoAuthType = errors.New("could not determine AuthType")
 )
 
 type EnvError struct {
